@@ -1,6 +1,5 @@
-import express from "express";
 import mysql from "mysql2";
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 dotenv.config();
 
 async function getModelsAndImages() {
@@ -26,6 +25,7 @@ async function getModelsAndImages() {
     const result = rows.reduce((acc, row) => {
       const {
         id,
+        make,
         model_name,
         trim_name,
         generation,
@@ -61,6 +61,7 @@ async function getModelsAndImages() {
         // Create a new row with the image
         const newRow = {
           id,
+          make,
           model_name,
           trim_name,
           generation,
@@ -86,7 +87,6 @@ async function getModelsAndImages() {
       return acc;
     }, []);
 
-    //   console.log(result.map((record) => record.images));
     return result;
   } catch (err) {
     console.error(err);
@@ -95,10 +95,11 @@ async function getModelsAndImages() {
   }
 }
 
-async function displayModelsAndImages() {
+// wrap the getModelsAndImages() in a a new async try/catch for error handling
+export async function displayModelsAndImages() {
   try {
     const data = await getModelsAndImages();
-    console.log(data);
+    return data;
   } catch (error) {
     console.error(error);
   }
