@@ -104,5 +104,3 @@ export async function displayModelsAndImages() {
     console.error(error);
   }
 }
-
-displayModelsAndImages();
