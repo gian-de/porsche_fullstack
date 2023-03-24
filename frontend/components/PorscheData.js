@@ -9,19 +9,17 @@ const PorscheData = () => {
   const [selectedModels, setSelectedModels] = useState([]);
   const [selectedGenerations, setSelectedGenerations] = useState(null);
   const [possibleGenerations, setPossibleGenerations] = useState(null);
+  const [selectedSortOption, setSelectedSortOption] = useState(null);
+  const [selectedSortDirection, setSelectedSortDirection] = useState(null);
 
   if (isLoadingPorscheData) return <p>Loading...</p>;
   if (errorPorscheData) return <p>Error: {error.message}</p>;
 
-  console.log("Line 19", porscheData);
+  console.log("Line 18", porscheData);
 
   // Get all unique "sub data" choices to filter from
   const allModels = porscheData.map((car) => car.model_name);
   const models = [...new Set(allModels)];
-
-  // Get all unique "sub data" choices to filter from
-  const allGenerations = porscheData.map((car) => car.generation);
-  const generations = [...new Set(allGenerations)];
 
   // Filter the data based on selected model and generation
   const filteredData = porscheData.filter(
@@ -76,30 +74,94 @@ const PorscheData = () => {
     setSelectedGenerations(selectedOptions);
   };
 
-  console.log("possible generations", possibleGenerations);
+  const resetFilters = () => {
+    setSelectedModels([]);
+    setSelectedGenerations(null);
+    setPossibleGenerations(null);
+    setSelectedSortOption(null);
+    setSelectedSortDirection(null);
+  };
+
+  // sort functionality starts
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    if (name === "sort") {
+      const [sortOption, sortDirection] = value.split("-");
+      setSelectedSortOption(sortOption);
+      setSelectedSortDirection(sortDirection);
+    }
+  };
+
+  const sortedData = filteredData.sort((a, b) => {
+    if (!selectedSortOption) return 0;
+
+    const aValue = a[selectedSortOption];
+    const bValue = b[selectedSortOption];
+
+    if (aValue < bValue) {
+      return selectedSortDirection === "asc" ? -1 : 1;
+    } else if (aValue > bValue) {
+      return selectedSortDirection === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+  console.log("sorted Data", sortedData);
 
   return (
     <div>
-      <div className="text-gray-800">
-        <Select
-          options={models.map((model) => ({ value: model, label: model }))}
-          value={selectedModels}
-          onChange={handleModelChange}
-          placeholder="Select model(s)..."
-          isMulti={true}
-        />
-
-        {/* Render the Select dropdown only if there are more than one generation options available */}
-        {selectedModels?.length === 1 && getGenerationOptions().length > 1 && (
+      <div className="text-gray-800 flex space-x-8">
+        <div className="flex-col">
           <Select
-            options={getGenerationOptions()}
-            value={selectedGenerations}
-            onChange={handleGenerationChange}
-            placeholder="Select generation(s)..."
+            options={models.map((model) => ({ value: model, label: model }))}
+            value={selectedModels}
+            onChange={handleModelChange}
+            placeholder="Select model(s)..."
             isMulti={true}
           />
-        )}
+          {/* Render the Select dropdown only if there are more than one generation options available */}
+          {selectedModels?.length === 1 &&
+            getGenerationOptions().length > 1 && (
+              <Select
+                options={getGenerationOptions()}
+                value={selectedGenerations}
+                onChange={handleGenerationChange}
+                placeholder="Select generation(s)..."
+                isMulti={true}
+              />
+            )}
+        </div>
+        {/* RESET ALL FILTER BUTTON */}
+        <div>
+          <button
+            className="bg-red-600 rounded-full px-5 py-2"
+            onClick={resetFilters}
+          >
+            Reset all Filters
+          </button>
+        </div>
       </div>
+      {/* Sort by Price/Horsepower/0-60 Select, don't render if there's only 1 option */}
+
+      {sortedData.length === 1 ? null : (
+        <div className="">
+          <select
+            className="bg-blue-500 px-4 py-2 text-slate-200"
+            name="sort"
+            value={`${selectedSortOption}-${selectedSortDirection}`}
+            onChange={handleChange}
+          >
+            <option value="">Sort by</option>
+            <option value="price-asc">Price (low to high)</option>
+            <option value="price-desc">Price (high to low)</option>
+            <option value="zero_to_sixty-asc">0-60 mph (low to high)</option>
+            <option value="zero_to_sixty-desc">0-60 mph (high to low)</option>
+            <option value="horsepower-asc">Horsepower (low to high)</option>
+            <option value="horsepower-desc">Horsepower (high to low)</option>
+            <option value="clear">Clear</option>
+          </select>
+        </div>
+      )}
       <div>
         {filteredData.map((car) => (
           <p key={car.id}>
