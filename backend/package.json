@@ -2,7 +2,6 @@
   "name": "porsche_backend",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "app.js",
   "keywords": [],
   "author": "giandemir",
@@ -26,6 +25,6 @@
     "dev": "nodemon --exec babel-node src/app.js",
     "build": "babel src -d dist",
     "start": "node dist/app.js",
-    "both-dev": "concurrently \"npm run dev\" \"npm --prefix ../client/ run dev\""
+    "both-dev": "concurrently \"npm run dev\" \"npm --prefix ../frontend/ run dev\""
   }
 }
