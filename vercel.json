@@ -1,6 +1,5 @@
 {
-  "builds": [
-    { "src": "frontend/package.json", "use": "@vercel/node" },
-    { "src": "backend/package.json", "use": "@vercel/node" }
-  ]
+  "buildCommand": "cd frontend && npm i && npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [{ "source": "/backend/(.*)", "destination": "/backend/app.js" }]
 }
