@@ -5,7 +5,7 @@ dotenv.config();
 async function getModelsAndImages() {
   const pool = await mysql
     .createPool({
-      host: "localhost",
+      host: process.env.DB_HOST,
       user: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
@@ -86,7 +86,7 @@ async function getModelsAndImages() {
 
       return acc;
     }, []);
-
+    console.log("result", result);
     return result;
   } catch (err) {
     console.error(err);

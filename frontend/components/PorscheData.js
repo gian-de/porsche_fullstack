@@ -110,7 +110,7 @@ const PorscheData = () => {
 
   return (
     <div>
-      <div className="text-gray-800 flex space-x-8">
+      <div className="flex space-x-8 text-gray-800">
         <div className="flex-col">
           <Select
             options={models.map((model) => ({ value: model, label: model }))}
@@ -134,7 +134,7 @@ const PorscheData = () => {
         {/* RESET ALL FILTER BUTTON */}
         <div>
           <button
-            className="bg-red-600 rounded-full px-5 py-2"
+            className="px-5 py-2 bg-red-600 rounded-full"
             onClick={resetFilters}
           >
             Reset all Filters
@@ -146,7 +146,7 @@ const PorscheData = () => {
       {sortedData.length === 1 ? null : (
         <div className="">
           <select
-            className="bg-blue-500 px-4 py-2 text-slate-200"
+            className="px-4 py-2 bg-blue-500 text-slate-200"
             name="sort"
             value={`${selectedSortOption}-${selectedSortDirection}`}
             onChange={handleChange}
@@ -163,18 +163,34 @@ const PorscheData = () => {
         </div>
       )}
       <div>
-        {filteredData.map((car) => (
-          <p key={car.id}>
-            {car.make}
-            {car.model_name}
-            {car.trim_name}
-            <span className="px-2">{car.horsepower}</span>
-            <span className="px-2">{car.zero_to_sixty}</span>
-            <span className="px-2">{car.drivetrain}</span>
-            <span className="px-2">{car.price}</span> ({car.model_name},{" "}
-            {car.generation})
-          </p>
-        ))}
+        {filteredData.map((car) => {
+          console.log(
+            "inside map",
+            car.images.filter((item) => item.type === "Main")
+          );
+          const mainImg = car.images.filter((image) => image.type === "Main");
+          const [mainImgSrc] = mainImg.map((item) => item.path);
+          console.log("src maybe", mainImgSrc);
+          return (
+            <p key={car.id}>
+              <div>
+                <img
+                  src={mainImgSrc}
+                  alt=""
+                  className="flex object-cover w-20 h-20"
+                />
+              </div>
+              {car.make}
+              {car.model_name}
+              {car.trim_name}
+              <span className="px-2">{car.horsepower}</span>
+              <span className="px-2">{car.zero_to_sixty}</span>
+              <span className="px-2">{car.drivetrain}</span>
+              <span className="px-2">{car.price}</span> ({car.model_name},{" "}
+              {car.generation})
+            </p>
+          );
+        })}
       </div>
     </div>
   );
