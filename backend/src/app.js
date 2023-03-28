@@ -3,18 +3,32 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { displayModelsAndImages } from "./database.js";
+import { IndexEndpoint } from "./routes/IndexEndpoint.js";
+import Carrera from "./routes/Carrera.js";
+import Cayman from "./routes/Cayman.js";
+import Supercar from "./routes/Supercar.js";
+import Taycan from "./routes/Taycan.js";
+import Panamera from "./routes/Panamera.js";
+import Cayenne from "./routes/Cayenne.js";
+import Macan from "./routes/Macan.js";
 
 const PORT = process.env.PORT;
 
 const app = express();
 
+app.use(express.json());
 app.use(cors());
 
-app.get("/api/porsche", async (req, res) => {
-  const data = await displayModelsAndImages();
-  res.json(data);
-});
+// Initial endpoint
+app.get("/api/porsche", IndexEndpoint);
+// Routes
+app.use("/api/porsche/911", Carrera);
+app.use("/api/porsche/cayman", Cayman);
+app.use("/api/porsche/supercar", Supercar);
+app.use("/api/porsche/taycan", Taycan);
+app.use("/api/porsche/panamera", Panamera);
+app.use("/api/porsche/cayenne", Cayenne);
+app.use("/api/porsche/macan", Macan);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

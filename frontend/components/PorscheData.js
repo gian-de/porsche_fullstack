@@ -3,26 +3,32 @@ import Select from "react-select";
 import { usePorscheData } from "./hooks/usePorscheData";
 
 const PorscheData = () => {
-  const { porscheData, isLoadingPorscheData, errorPorscheData } =
-    usePorscheData();
+  const {
+    porscheData,
+    isLoadingPorscheData,
+    errorPorscheData,
+    hasNextPage,
+    fetchNextPage,
+  } = usePorscheData();
 
   const [selectedModels, setSelectedModels] = useState([]);
   const [selectedGenerations, setSelectedGenerations] = useState(null);
   const [possibleGenerations, setPossibleGenerations] = useState(null);
-  const [selectedSortOption, setSelectedSortOption] = useState(null);
-  const [selectedSortDirection, setSelectedSortDirection] = useState(null);
 
   if (isLoadingPorscheData) return <p>Loading...</p>;
-  if (errorPorscheData) return <p>Error: {error.message}</p>;
+  if (errorPorscheData) return <p>Error: {errorPorscheData.message}</p>;
 
-  console.log("Line 18", porscheData);
+  console.log("Line 18", porscheData.pages);
+  const dataaa = porscheData.pages[0];
+
+  console.log("DATTTTT", dataaa);
 
   // Get all unique "sub data" choices to filter from
-  const allModels = porscheData.map((car) => car.model_name);
+  const allModels = dataaa.map((car) => car.model_name);
   const models = [...new Set(allModels)];
 
   // Filter the data based on selected model and generation
-  const filteredData = porscheData.filter(
+  const filteredData = dataaa.filter(
     (car) =>
       (!selectedModels?.length ||
         selectedModels.some((selected) => selected.value === car.model_name)) &&
@@ -34,7 +40,7 @@ const PorscheData = () => {
 
   // when a user clicks on a Model, then this function runs
   const getPossibleGenerations = (selectedModels) => {
-    const possibleGenerations = porscheData
+    const possibleGenerations = dataaa
       .filter((car) =>
         selectedModels.some((selected) => selected.value === car.model_name)
       )
@@ -50,7 +56,7 @@ const PorscheData = () => {
     if (!selectedModel) return [];
 
     // filters the 'porscheData' for matching 'model_name', then maps the resulting array to only include its corresponding 'generation'
-    const allGenerations = porscheData
+    const allGenerations = dataaa
       .filter((car) => car.model_name === selectedModel)
       .map((car) => car.generation);
     // self-explanatory, creates new array with unique 'generations', then spreads to convert back into array
@@ -74,39 +80,7 @@ const PorscheData = () => {
     setSelectedGenerations(selectedOptions);
   };
 
-  const resetFilters = () => {
-    setSelectedModels([]);
-    setSelectedGenerations(null);
-    setPossibleGenerations(null);
-    setSelectedSortOption(null);
-    setSelectedSortDirection(null);
-  };
-
   // sort functionality starts
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    if (name === "sort") {
-      const [sortOption, sortDirection] = value.split("-");
-      setSelectedSortOption(sortOption);
-      setSelectedSortDirection(sortDirection);
-    }
-  };
-
-  const sortedData = filteredData.sort((a, b) => {
-    if (!selectedSortOption) return 0;
-
-    const aValue = a[selectedSortOption];
-    const bValue = b[selectedSortOption];
-
-    if (aValue < bValue) {
-      return selectedSortDirection === "asc" ? -1 : 1;
-    } else if (aValue > bValue) {
-      return selectedSortDirection === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
-  console.log("sorted Data", sortedData);
 
   return (
     <div>
@@ -131,46 +105,16 @@ const PorscheData = () => {
               />
             )}
         </div>
-        {/* RESET ALL FILTER BUTTON */}
-        <div>
-          <button
-            className="px-5 py-2 bg-red-600 rounded-full"
-            onClick={resetFilters}
-          >
-            Reset all Filters
-          </button>
-        </div>
       </div>
-      {/* Sort by Price/Horsepower/0-60 Select, don't render if there's only 1 option */}
 
-      {sortedData.length === 1 ? null : (
-        <div className="">
-          <select
-            className="px-4 py-2 bg-blue-500 text-slate-200"
-            name="sort"
-            value={`${selectedSortOption}-${selectedSortDirection}`}
-            onChange={handleChange}
-          >
-            <option value="">Sort by</option>
-            <option value="price-asc">Price (low to high)</option>
-            <option value="price-desc">Price (high to low)</option>
-            <option value="zero_to_sixty-asc">0-60 mph (low to high)</option>
-            <option value="zero_to_sixty-desc">0-60 mph (high to low)</option>
-            <option value="horsepower-asc">Horsepower (low to high)</option>
-            <option value="horsepower-desc">Horsepower (high to low)</option>
-            <option value="clear">Clear</option>
-          </select>
-        </div>
-      )}
       <div>
+        {console.log("before", filteredData)}
         {filteredData.map((car) => {
-          console.log(
-            "inside map",
-            car.images.filter((item) => item.type === "Main")
-          );
+          console.log("inside FILTERED", car);
+
           const mainImg = car.images.filter((image) => image.type === "Main");
           const [mainImgSrc] = mainImg.map((item) => item.path);
-          console.log("src maybe", mainImgSrc);
+          console.log("src maybe", mainImg);
           return (
             <p key={car.id}>
               <div>
@@ -196,3 +140,76 @@ const PorscheData = () => {
   );
 };
 export default PorscheData;
+
+// const [selectedSortOption, setSelectedSortOption] = useState(null);
+// const [selectedSortDirection, setSelectedSortDirection] = useState(null);
+
+// const resetFilters = () => {
+//   setSelectedModels([]);
+//   setSelectedGenerations(null);
+//   setPossibleGenerations(null);
+//   setSelectedSortOption(null);
+//   setSelectedSortDirection(null);
+// };
+
+// const handleChange = (event) => {
+//   const { name, value } = event.target;
+//   if (name === "sort") {
+//     const [sortOption, sortDirection] = value.split("-");
+//     setSelectedSortOption(sortOption);
+//     setSelectedSortDirection(sortDirection);
+//   }
+// };
+
+// const sortedData = filteredData.sort((a, b) => {
+//   if (!selectedSortOption) return 0;
+
+//   const aValue = a[selectedSortOption];
+//   const bValue = b[selectedSortOption];
+
+//   if (aValue < bValue) {
+//     return selectedSortDirection === "asc" ? -1 : 1;
+//   } else if (aValue > bValue) {
+//     return selectedSortDirection === "asc" ? 1 : -1;
+//   }
+//   return 0;
+// });
+// console.log("sorted Data", sortedData);
+
+{
+  /* Sort by Price/Horsepower/0-60 Select, don't render if there's only 1 option */
+}
+
+// {sortedData.length === 1 ? null : (
+//   <div className="">
+//     <select
+//       className="px-4 py-2 bg-blue-500 text-slate-200"
+//       name="sort"
+//       value={`${selectedSortOption}-${selectedSortDirection}`}
+//       onChange={handleChange}
+//     >
+//       <option value="">Sort by</option>
+//       <option value="price-asc">Price (low to high)</option>
+//       <option value="price-desc">Price (high to low)</option>
+//       <option value="zero_to_sixty-asc">0-60 mph (low to high)</option>
+//       <option value="zero_to_sixty-desc">0-60 mph (high to low)</option>
+//       <option value="horsepower-asc">Horsepower (low to high)</option>
+//       <option value="horsepower-desc">Horsepower (high to low)</option>
+//       <option value="clear">Clear</option>
+//     </select>
+//   </div>
+// )}
+
+{
+  /* RESET ALL FILTER BUTTON */
+}
+{
+  /* <div>
+<button
+  className="px-5 py-2 bg-red-600 rounded-full"
+  onClick={resetFilters}
+>
+  Reset all Filters
+</button>
+</div> */
+}
