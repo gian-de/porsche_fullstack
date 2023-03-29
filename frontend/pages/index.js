@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import MainPage from "../components/landingpage/MainPage";
+import LandingPage from "../components/LandingPage";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,8 +15,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <h2 className="dark:text-red-400 text-3xl uppercase">test</h2>
-        <MainPage />
+        <nav className="py-10 mb-10 text-center bg-slate-600">
+          NAV PLACEHOLDER
+        </nav>
+        <LandingPage />
       </main>
     </>
   );
