@@ -92,16 +92,51 @@ function formatModelsAndImages(rows) {
   return result;
 }
 
-export async function queryAllModelsAndImages() {
+export async function queryAllModelsAndImagesByFilters(formattedParams) {
   try {
-    const [rows, fields] = await pool.query(`
+    let q = `
     SELECT models.*, images.id AS image_id, images.image_type, images.image_path
     FROM models
     LEFT JOIN images
-    ON models.id = images.model_id;
-  `);
+    ON models.id = images.model_id
+  `;
+    // variable to add the conditions
+    let conditions = [];
+    // variable to check if the "WHERE" clause has been added to the sql q already
+    let hasWhereClause = false;
+
+    if (formattedParams.between) {
+      conditions.push(
+        `models.${formattedParams.between.field} BETWEEN ${formattedParams.between.values[0]} AND ${formattedParams.between.values[1]}`
+      );
+    }
+    // iterate through the keys of the formattedParams object passed in from the api endpoint
+    Object.keys(formattedParams).forEach((key) => {
+      let values = formattedParams[key];
+      if (key === "sort" || !Array.isArray(values)) {
+        // skip the "sort" property and non-array values
+        return;
+      }
+      // map array and add placeholder for each value then combine into string seperated by comma
+      let placeholders = values.map(() => "?").join(",");
+      conditions.push(`models.${key} IN (${placeholders})`);
+    });
+    if (conditions.length > 0 && !hasWhereClause) {
+      // add the WHERE clause to the q
+      q += ` WHERE ${conditions.join(" AND ")}`;
+      hasWhereClause = true;
+    }
+
+    // if sort is defined then append query (q) a ORDER BY statement
+    if (formattedParams.sort) {
+      q += ` ORDER BY models.${formattedParams.sort.field} ${formattedParams.sort.order}`;
+    }
+
+    // flatten the values into a single array
+    let values = Object.values(formattedParams).flat();
+
+    const [rows, fields] = await pool.query(q, values);
     const result = formatModelsAndImages(rows);
-    console.log("result", result);
     return result;
   } catch (err) {
     console.error(err);
