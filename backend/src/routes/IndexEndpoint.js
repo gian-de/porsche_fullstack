@@ -3,7 +3,6 @@ import { queryAllModelsAndImagesByFilters } from "../database";
 export const IndexEndpoint = async (req, res) => {
   try {
     const formattedParams = formatQueryParams(req.query);
-    console.log("FORMATTED PARAMS", formattedParams);
     const data = await queryAllModelsAndImagesByFilters(formattedParams);
     res.json(data);
   } catch (err) {
