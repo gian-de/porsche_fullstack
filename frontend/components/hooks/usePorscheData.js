@@ -10,9 +10,7 @@ export const usePorscheData = (formData) => {
     ["porscheData", formData],
     async () => {
       const params = {};
-
       // check to see if there is indeed a param inside specific formData option, if so add into params url request
-
       if (formData.model_name.length > 0) {
         params.model_name = formData.model_name
           .map((opt) => opt.value)
@@ -48,3 +46,8 @@ export const usePorscheData = (formData) => {
     error,
   };
 };
+// SELECT models.*, images.id AS image_id, images.image_type, images.image_path
+// FROM models
+// LEFT JOIN images ON models.id = images.model_id
+// WHERE models.model_name IN (?,?) AND models.drivetrain IN (?,?) AND models.num_doors IN (?) AND models.year BETWEEN 2010 AND 2020
+// ORDER BY models.year DESC;
