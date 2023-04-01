@@ -55,5 +55,7 @@ const formatQueryParams = (queryParams) => {
       formattedParams[key] = value.split(",");
     }
   }
+  // example of sort url http://localhost:7777/api/porsche?sort=price,asc
+  // example of between url http://localhost:7777/api/porsche?between=year,2010-2020
   return formattedParams;
 };
