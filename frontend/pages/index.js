@@ -15,9 +15,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <nav className="py-10 mb-10 text-center bg-slate-600">
-          NAV PLACEHOLDER
-        </nav>
         <LandingPage />
       </main>
     </>
