@@ -1,7 +1,11 @@
 import { useState } from "react";
+import Image from "next/image";
 import Select from "react-select";
+import { Disclosure } from "@headlessui/react";
+import ChevronDown from "./svgs/ChevronDown";
 
 import { usePorscheData } from "./hooks/usePorscheData";
+import PorscheLogo from "../public/porsche-logo-compressed.png";
 
 // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 const baseURL = "http://localhost:7777";
@@ -15,7 +19,8 @@ const LandingPage = () => {
     drivetrain: [],
     engine_layout: [],
   });
-  // input state for filter
+  // state for mobile menu
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { porscheData, isLoading, error } = usePorscheData(formData);
 
@@ -26,6 +31,8 @@ const LandingPage = () => {
   // state for sorting data
   const [selectedSortOption, setSelectedSortOption] = useState(null);
   const [selectedSortDirection, setSelectedSortDirection] = useState(null);
+  // state for sort dropdown to update when a sort option is selected by user
+  const [selectedSortValue, setSelectedSortValue] = useState(null);
 
   // start of "handleChange" functions
   const handleBetweenOptionChange = (selectedOption) => {
@@ -62,12 +69,22 @@ const LandingPage = () => {
   const handleEngineLayoutChange = (selectedOption) => {
     setFormData({ ...formData, engine_layout: selectedOption });
   };
-  const handleSortChange = (event) => {
-    const { name, value } = event.target;
-    if (name === "sort") {
-      const [sortOption, sortDirection] = value.split("-");
+  const handleSortChange = (selectedOption) => {
+    const values = selectedOption.value;
+    const [sortOption, sortDirection] = values.split("-");
+    if (values === "clear") {
+      setSelectedSortOption(null);
+      setSelectedSortDirection(null);
+      setSelectedSortValue(null);
+    } else {
       setSelectedSortOption(sortOption);
       setSelectedSortDirection(sortDirection);
+    }
+    // if-else to set the input state to null and doesnt show "Clear", for it to the show placeholder text
+    if (selectedOption.value === "clear") {
+      setSelectedSortValue(null);
+    } else {
+      setSelectedSortValue(selectedOption);
     }
   };
   const resetFilters = (e) => {
@@ -81,6 +98,7 @@ const LandingPage = () => {
     });
     setSelectedSortOption(null);
     setSelectedSortDirection(null);
+    setSelectedSortValue(null);
     setBetweenOption("");
     setMinValue("");
     setMaxValue("");
@@ -114,6 +132,18 @@ const LandingPage = () => {
     { value: "weight", label: "Weight" },
     { value: "year", label: "Year" },
   ];
+
+  const sortOptions = [
+    { value: "price-asc", label: "Lowest Price" },
+    { value: "price-desc", label: "Highest Price" },
+    { value: "zero_to_sixty-asc", label: "0-60 mph (asc)" },
+    { value: "zero_to_sixty-desc", label: "0-60 mph (desc)" },
+    { value: "horsepower-asc", label: "Horsepower (asc)" },
+    { value: "horsepower-desc", label: "Horsepower (desc)" },
+    { value: "model_name-asc", label: "Alphabetical (a-z)" },
+    { value: "model_name-desc", label: "Alphabetical (z-a)" },
+    { value: "clear", label: "Clear" },
+  ];
   // filter && sort functionality starts about here
   const newData = porscheData?.filter((car) => {
     if (betweenOption) {
@@ -141,9 +171,215 @@ const LandingPage = () => {
   console.log("newdata", newData);
 
   return (
-    <div>
-      <form className="text-blue-600">
-        <div>
+    <>
+      <nav className="flex items-center justify-between p-3 bg-slate-300">
+        <div className="flex items-center space-x-1 sm:space-x-3">
+          <Image
+            className="object-cover w-16 h-12 sm:w-20 sm:h-24"
+            alt="Porsche Logo"
+            src={PorscheLogo}
+            priority
+          />
+          <h1 className="text-xl sm:text-2xl">"Mini-Wiki"</h1>
+        </div>
+      </nav>
+      <div className="flex justify-between px-10 bg-green-400">
+        <div className="flex flex-col max-w-md bg-yellow-300 rounded-sm">
+          <Disclosure>
+            {({ open }) => (
+              <>
+                <Disclosure.Button className="flex items-center justify-between px-4 py-2 space-x-2">
+                  <span>Filter by...</span>
+                  <ChevronDown className="w-2 h-2 " />
+                </Disclosure.Button>
+                <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm">
+                  <form className="flex-col bg-green-300 w-fit lg:flex">
+                    <div className="flex flex-col bg-blue-500 w-60">
+                      <label htmlFor="select-models">
+                        {"Select Models..."}
+                      </label>
+                      <div>
+                        <Select
+                          inputId="select-models"
+                          isMulti
+                          options={modelOptions}
+                          onChange={handleModelChange}
+                          value={formData.model_name}
+                          placeholder="Cayman, Taycan"
+                          aria-labelledby="select-models-label"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col bg-blue-600 w-60">
+                      <label htmlFor="select-drivetrain">
+                        {"Select Drivetrains..."}
+                      </label>
+                      <Select
+                        inputId="select-drivetrain"
+                        isMulti
+                        options={drivetrainOptions}
+                        onChange={handleDrivetrainChange}
+                        value={formData.drivetrain}
+                        placeholder="AWD, RWD"
+                        aria-labelledby="select-drivetrain-label"
+                      />
+                    </div>
+                    <div className="flex flex-col bg-blue-600 w-60">
+                      <label htmlFor="select-engineLayout">
+                        {"Select Engine Layout..."}
+                      </label>
+                      <Select
+                        inputId="select-engineLayout"
+                        isMulti
+                        options={engineLayoutOptions}
+                        onChange={handleEngineLayoutChange}
+                        value={formData.engine_layout}
+                        placeholder="Mid-Engine"
+                        aria-labelledby="select-drivetrain-label"
+                      />
+                    </div>
+
+                    <div className="flex items-center mt-4">
+                      <label htmlFor="select-filter" className="mr-2">
+                        Filter By:
+                      </label>
+                      <Select
+                        inputId="select-filter"
+                        options={betweenOptions}
+                        onChange={handleBetweenOptionChange}
+                        value={betweenOption}
+                        placeholder="Price, Year"
+                        aria-labelledby="select-filters-label"
+                      />
+                      {/* render the inputs when the user selects an option aka true */}
+                      {betweenOption ? (
+                        betweenOption?.value === "year" ? (
+                          <div className="bg-red-400 ">
+                            <input
+                              type="text"
+                              value={minValue}
+                              onChange={handleMinValueChange}
+                              placeholder="1985"
+                            />
+                            <span>-</span>
+                            <input
+                              type="text"
+                              value={maxValue}
+                              onChange={handleMaxValueChange}
+                              placeholder="2023"
+                            />
+                          </div>
+                        ) : (
+                          <div className=" bg-slate-200">
+                            <input
+                              type="text"
+                              value={minValue}
+                              onChange={handleMinValueChange}
+                            />
+                            <span>-</span>
+                            <input
+                              type="text"
+                              value={maxValue}
+                              onChange={handleMaxValueChange}
+                            />
+                          </div>
+                        )
+                      ) : null}
+                    </div>
+                    {/* RESET ALL FILTER BUTTON */}
+                    <div>
+                      <button
+                        className="px-5 py-2 bg-red-600 rounded-full"
+                        onClick={resetFilters}
+                      >
+                        Reset all Filters
+                      </button>
+                    </div>
+                  </form>
+                </Disclosure.Panel>
+              </>
+            )}
+          </Disclosure>
+        </div>
+        <div className="flex">
+          {sortedData?.length === 1 ? null : (
+            <Select
+              className="text-sm w-36 whitespace-nowrap sm:w-40 sm:text-base"
+              name="sort"
+              options={sortOptions}
+              onChange={handleSortChange}
+              value={selectedSortValue}
+              placeholder="Sort by..."
+            />
+          )}
+        </div>
+      </div>
+      {newData &&
+        newData?.map((item) => {
+          const mainImg = item?.images?.filter(
+            (image) => image.type === "Main"
+          );
+          const [mainImgSrc] = mainImg.map((image) => image.path);
+          return (
+            <div key={item.id}>
+              <img className="w-60" src={mainImgSrc} alt="" />
+              <p>{item.model_name}</p>
+            </div>
+          );
+        })}
+      {isLoading && <p>Loading...</p>}
+      {!isLoading && newData?.length === 0 && (
+        <p>Oops, no data that matches your search criteria available</p>
+      )}
+      {error && <p>Error: {error.message}</p>}
+    </>
+  );
+};
+
+export default LandingPage;
+
+/* <form className="flex-col bg-green-300 w-fit lg:flex">
+          <div className="flex flex-col bg-blue-500 w-60">
+            <label htmlFor="select-models">{"Select Models..."}</label>
+            <div>
+              <Select
+                inputId="select-models"
+                isMulti
+                options={modelOptions}
+                onChange={handleModelChange}
+                value={formData.model_name}
+                placeholder="Cayman, Taycan"
+                aria-labelledby="select-models-label"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col bg-blue-600 w-60">
+            <label htmlFor="select-drivetrain">{"Select Drivetrains..."}</label>
+            <Select
+              inputId="select-drivetrain"
+              isMulti
+              options={drivetrainOptions}
+              onChange={handleDrivetrainChange}
+              value={formData.drivetrain}
+              placeholder="AWD, RWD"
+              aria-labelledby="select-drivetrain-label"
+            />
+          </div>
+          <div className="flex flex-col bg-blue-600 w-60">
+            <label htmlFor="select-engineLayout">
+              {"Select Engine Layout..."}
+            </label>
+            <Select
+              inputId="select-engineLayout"
+              isMulti
+              options={engineLayoutOptions}
+              onChange={handleEngineLayoutChange}
+              value={formData.engine_layout}
+              placeholder="Mid-Engine"
+              aria-labelledby="select-drivetrain-label"
+            />
+          </div>
+
           <div className="flex items-center mt-4">
             <label htmlFor="select-filter" className="mr-2">
               Filter By:
@@ -156,7 +392,7 @@ const LandingPage = () => {
               placeholder="Price, Year"
               aria-labelledby="select-filters-label"
             />
-            {/* render the inputs when the user selects an option aka true */}
+            {/* render the inputs when the user selects an option aka true 
             {betweenOption ? (
               betweenOption?.value === "year" ? (
                 <div className="bg-red-400 ">
@@ -164,12 +400,14 @@ const LandingPage = () => {
                     type="text"
                     value={minValue}
                     onChange={handleMinValueChange}
+                    placeholder="1985"
                   />
                   <span>-</span>
                   <input
                     type="text"
                     value={maxValue}
                     onChange={handleMaxValueChange}
+                    placeholder="2023"
                   />
                 </div>
               ) : (
@@ -189,97 +427,13 @@ const LandingPage = () => {
               )
             ) : null}
           </div>
-        </div>
-        <div className="flex">
-          <label htmlFor="select-models">{"Select Models..."}</label>
-          <Select
-            inputId="select-models"
-            isMulti
-            options={modelOptions}
-            onChange={handleModelChange}
-            value={formData.model_name}
-            placeholder="Cayman, Taycan"
-            aria-labelledby="select-models-label"
-          />
-        </div>
-        <div className="flex">
-          <label htmlFor="select-drivetrain">{"Select Drivetrains..."}</label>
-          <Select
-            inputId="select-drivetrain"
-            isMulti
-            options={drivetrainOptions}
-            onChange={handleDrivetrainChange}
-            value={formData.drivetrain}
-            placeholder="AWD, RWD"
-            aria-labelledby="select-drivetrain-label"
-          />
-        </div>
-        <div className="flex">
-          <label htmlFor="select-engineLayout">
-            {"Select Engine Layout..."}
-          </label>
-          <Select
-            inputId="select-engineLayout"
-            isMulti
-            options={engineLayoutOptions}
-            onChange={handleEngineLayoutChange}
-            value={formData.engine_layout}
-            placeholder="Front-Engine, Mid-Engine"
-            aria-labelledby="select-drivetrain-label"
-          />
-        </div>
-        {sortedData?.length === 1 ? null : (
-          <div className="">
-            <select
-              className="px-4 py-2 bg-blue-500 text-slate-200"
-              name="sort"
-              value={`${selectedSortOption}-${selectedSortDirection}`}
-              onChange={handleSortChange}
+          
+          <div>
+            <button
+              className="px-5 py-2 bg-red-600 rounded-full"
+              onClick={resetFilters}
             >
-              <option value="">Sort by</option>
-              <option value="price-asc">Price (low to high)</option>
-              <option value="price-desc">Price (high to low)</option>
-              <option value="zero_to_sixty-asc">0-60 mph (low to high)</option>
-              <option value="zero_to_sixty-desc">0-60 mph (high to low)</option>
-              <option value="horsepower-asc">Horsepower (low to high)</option>
-              <option value="horsepower-desc">Horsepower (high to low)</option>
-              <option value="model_name-asc">Alphabetical (a-z)</option>
-              <option value="model_name-desc">Alphabetical (z-a)</option>
-              <option value="clear">Clear</option>
-            </select>
+              Reset all Filters
+            </button>
           </div>
-        )}
-        {/* RESET ALL FILTER BUTTON */}
-
-        <div>
-          <button
-            className="px-5 py-2 bg-red-600 rounded-full"
-            onClick={resetFilters}
-          >
-            Reset all Filters
-          </button>
-        </div>
-      </form>
-      {newData &&
-        newData?.map((item) => (
-          <div key={item.id}>
-            <p>{item.model_name}</p>
-          </div>
-        ))}
-      {isLoading && <p>Loading...</p>}
-      {!isLoading && newData?.length === 0 && (
-        <p>Oops, no data that matches your search criteria available</p>
-      )}
-      {error && <p>Error: {error.message}</p>}
-    </div>
-  );
-};
-
-export default LandingPage;
-
-// filteredData.map((car) => {
-//   console.log("inside FILTERED", car);
-
-//   const mainImg = car.images.filter((image) => image.type === "Main");
-//   const [mainImgSrc] = mainImg.map((item) => item.path);
-//   console.log("src maybe", mainImg)})
+        </form> */
