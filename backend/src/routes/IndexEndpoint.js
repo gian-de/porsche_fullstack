@@ -28,8 +28,6 @@ const formatQueryParams = (queryParams) => {
     "between",
   ];
   const formattedParams = {};
-  let sqlWhereClause = [];
-  let sqlParams = [];
   // converts "queryParams" into an easier to use Obj
   for (const [key, value] of Object.entries(queryParams)) {
     // check to see if params are whitelisted from "validProps" array options

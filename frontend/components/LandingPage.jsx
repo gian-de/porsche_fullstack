@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+
 import Image from "next/image";
 import Select from "react-select";
 import { Disclosure } from "@headlessui/react";
-import ChevronDown from "./svgs/ChevronDown";
+import Pagination from "./Pagination";
 
 import { usePorscheData } from "./hooks/usePorscheData";
+
+import FilterIcon from "./svgs/FilterIcon";
+import Xcircle from "./svgs/Xcircle";
 import PorscheLogo from "../public/porsche-logo-compressed.png";
 
 // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -12,6 +16,7 @@ const baseURL = "http://localhost:7777";
 const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 const LandingPage = () => {
+  // state for form logic starts
   const [formData, setFormData] = useState({
     model_name: [],
     generation: [],
@@ -19,10 +24,12 @@ const LandingPage = () => {
     drivetrain: [],
     engine_layout: [],
   });
-  // state for mobile menu
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const { porscheData, isLoading, error } = usePorscheData(formData);
+  // // Pagination state and for latest data after filter/sort
+  const ITEMS_PER_PAGE = 8;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [latestData, setLatestData] = useState([]);
 
   // state to filter data
   const [betweenOption, setBetweenOption] = useState("");
@@ -80,9 +87,10 @@ const LandingPage = () => {
       setSelectedSortOption(sortOption);
       setSelectedSortDirection(sortDirection);
     }
-    // if-else to set the input state to null and doesnt show "Clear", for it to the show placeholder text
+    // if-else to set the input state to null and doesnt show "Clear", for it to the show placeholder text but also show the current selected value as the "value" for option
     if (selectedOption.value === "clear") {
       setSelectedSortValue(null);
+      setSelectedSortOption(null);
     } else {
       setSelectedSortValue(selectedOption);
     }
@@ -102,6 +110,10 @@ const LandingPage = () => {
     setBetweenOption("");
     setMinValue("");
     setMaxValue("");
+  };
+
+  const handlePageChange = ({ selected: selectedPage }) => {
+    setCurrentPage(selectedPage);
   };
 
   // defining the "schema" for the options in "Select"
@@ -142,37 +154,94 @@ const LandingPage = () => {
     { value: "horsepower-desc", label: "Horsepower (desc)" },
     { value: "model_name-asc", label: "Alphabetical (a-z)" },
     { value: "model_name-desc", label: "Alphabetical (z-a)" },
-    { value: "clear", label: "Clear" },
+    { value: "clear", label: "Clear Sort ↕" },
   ];
+
   // filter && sort functionality starts about here
-  const newData = porscheData?.filter((car) => {
-    if (betweenOption) {
-      const { value } = betweenOption;
-      // Filter cars based on selected option and min/max values
-      return car[value] >= minValue && car[value] <= (maxValue || 3000000);
-    }
-    return true;
-  });
-  const sortedData = newData?.sort((a, b) => {
-    if (!selectedSortOption) return 0;
+  // const filteredData = porscheData?.filter((car) => {
+  //   if (betweenOption) {
+  //     const { value } = betweenOption;
+  //     // Filter cars based on selected option and min/max values
+  //     return car[value] >= minValue && car[value] <= (maxValue || 3000000);
+  //   }
+  //   return true;
+  // });
 
-    const aValue = a[selectedSortOption];
-    const bValue = b[selectedSortOption];
+  // ///////////////////////////
+  // const sortedData = filteredData?.sort((a, b) => {
+  //   if (!selectedSortOption) return 0;
 
-    if (aValue < bValue) {
-      return selectedSortDirection === "asc" ? -1 : 1;
-    } else if (aValue > bValue) {
-      return selectedSortDirection === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+  //   const aValue = a[selectedSortOption];
+  //   const bValue = b[selectedSortOption];
+
+  //   if (aValue < bValue) {
+  //     return selectedSortDirection === "asc" ? -1 : 1;
+  //   } else if (aValue > bValue) {
+  //     return selectedSortDirection === "asc" ? 1 : -1;
+  //   }
+  //   return 0;
+  // });
+
+  // const offest = currentPage * ITEMS_PER_PAGE;
+  // const paginatedData = latestData?.slice(offest, offest + ITEMS_PER_PAGE);
+  // const pageCount = Math.ceil(latestData?.length / ITEMS_PER_PAGE);
+
+  // const paginatedData = useMemo(() => {
+  //   const startIndex = currentPage * ITEMS_PER_PAGE;
+  //   return latestData?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // }, [currentPage, latestData]);
+
+  const filteredData = useMemo(() => {
+    return porscheData?.filter((car) => {
+      if (betweenOption) {
+        const { value } = betweenOption;
+        return car[value] >= minValue && car[value] <= (maxValue || 3000000);
+      }
+      return true;
+    });
+  }, [betweenOption, minValue, maxValue, porscheData]);
+
+  const sortedData = useMemo(() => {
+    return filteredData?.sort((a, b) => {
+      if (!selectedSortOption) return 0;
+
+      const aValue = a[selectedSortOption];
+      const bValue = b[selectedSortOption];
+
+      if (aValue < bValue) {
+        return selectedSortDirection === "asc" ? -1 : 1;
+      } else if (aValue > bValue) {
+        return selectedSortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredData, selectedSortOption, selectedSortDirection]);
+
+  const getPaginatedData = () => {
+    const startIndex = currentPage * ITEMS_PER_PAGE;
+    return latestData?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  };
+
+  const paginatedData = getPaginatedData();
+
+  const pageCount = Math.ceil(latestData?.length / ITEMS_PER_PAGE);
 
   console.log("REACT_QUERY_DATA", porscheData);
-  console.log("newdata", newData);
+  console.log("sorted/filteredData", filteredData);
+  console.log("SORTEDDD", sortedData);
+  console.log("PAGINATED DATA", paginatedData);
+  console.log("latest DATA", latestData);
+  useEffect(() => {
+    if (sortedData) {
+      setLatestData(sortedData);
+    } else {
+      setLatestData(filteredData);
+    }
+  }, [filteredData, sortedData]);
 
   return (
     <>
-      <nav className="flex items-center justify-between p-3 bg-slate-300">
+      <nav className="flex items-center justify-between px-4 py-6 bg-slate-300">
         <div className="flex items-center space-x-1 sm:space-x-3">
           <Image
             className="object-cover w-16 h-12 sm:w-20 sm:h-24"
@@ -183,20 +252,23 @@ const LandingPage = () => {
           <h1 className="text-xl sm:text-2xl">"Mini-Wiki"</h1>
         </div>
       </nav>
-      <div className="flex justify-between px-10 bg-green-400">
-        <div className="flex flex-col max-w-md bg-yellow-300 rounded-sm">
+      <div className="flex items-start justify-between px-10 py-3 bg-black">
+        <div className="flex flex-col max-w-xs text-sm text-gray-500 rounded-sm bg-slate-50">
           <Disclosure>
             {({ open }) => (
               <>
-                <Disclosure.Button className="flex items-center justify-between px-4 py-2 space-x-2">
-                  <span>Filter by...</span>
-                  <ChevronDown className="w-2 h-2 " />
+                <Disclosure.Button className="flex items-center justify-between px-4 py-2 space-x-3">
+                  {open ? <span></span> : <h4>Filter by...</h4>}
+                  {open ? <Xcircle /> : <FilterIcon />}
                 </Disclosure.Button>
-                <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm">
-                  <form className="flex-col bg-green-300 w-fit lg:flex">
-                    <div className="flex flex-col bg-blue-500 w-60">
-                      <label htmlFor="select-models">
-                        {"Select Models..."}
+                <Disclosure.Panel className="px-4 pb-4 text-sm text-black">
+                  <form className="flex-col w-56 -mt-4 space-y-4 lg:flex">
+                    <div className="flex flex-col">
+                      <label
+                        className="pl-2 text-base w-fit"
+                        htmlFor="select-models"
+                      >
+                        {"Models..."}
                       </label>
                       <div>
                         <Select
@@ -210,9 +282,12 @@ const LandingPage = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex flex-col bg-blue-600 w-60">
-                      <label htmlFor="select-drivetrain">
-                        {"Select Drivetrains..."}
+                    <div className="flex flex-col">
+                      <label
+                        className="pl-2 text-base w-fit"
+                        htmlFor="select-drivetrain"
+                      >
+                        {"Drivetrains..."}
                       </label>
                       <Select
                         inputId="select-drivetrain"
@@ -224,9 +299,12 @@ const LandingPage = () => {
                         aria-labelledby="select-drivetrain-label"
                       />
                     </div>
-                    <div className="flex flex-col bg-blue-600 w-60">
-                      <label htmlFor="select-engineLayout">
-                        {"Select Engine Layout..."}
+                    <div className="flex flex-col">
+                      <label
+                        className="pl-2 text-base w-fit"
+                        htmlFor="select-engineLayout"
+                      >
+                        {"Engine Layout..."}
                       </label>
                       <Select
                         inputId="select-engineLayout"
@@ -238,10 +316,12 @@ const LandingPage = () => {
                         aria-labelledby="select-drivetrain-label"
                       />
                     </div>
-
-                    <div className="flex items-center mt-4">
-                      <label htmlFor="select-filter" className="mr-2">
-                        Filter By:
+                    <div className="flex flex-col">
+                      <label
+                        className="pl-2 text-base w-fit"
+                        htmlFor="select-filter"
+                      >
+                        More:
                       </label>
                       <Select
                         inputId="select-filter"
@@ -254,15 +334,17 @@ const LandingPage = () => {
                       {/* render the inputs when the user selects an option aka true */}
                       {betweenOption ? (
                         betweenOption?.value === "year" ? (
-                          <div className="bg-red-400 ">
+                          <div className="flex items-center justify-center mt-3 space-x-1">
                             <input
+                              className="flex w-16 py-1 pl-2 border rounded-md border-slate-300"
                               type="text"
                               value={minValue}
                               onChange={handleMinValueChange}
                               placeholder="1985"
                             />
-                            <span>-</span>
+                            <span className="text-lg">-</span>
                             <input
+                              className="flex w-16 py-1 pl-2 border rounded-md border-slate-300"
                               type="text"
                               value={maxValue}
                               onChange={handleMaxValueChange}
@@ -270,26 +352,30 @@ const LandingPage = () => {
                             />
                           </div>
                         ) : (
-                          <div className=" bg-slate-200">
+                          <div className="flex items-center justify-center mt-3 space-x-1">
                             <input
+                              className="flex w-20 py-1 pl-2 border rounded-md border-slate-300"
                               type="text"
                               value={minValue}
                               onChange={handleMinValueChange}
+                              placeholder="0"
                             />
-                            <span>-</span>
+                            <span className="text-lg">-</span>
                             <input
+                              className="flex w-20 py-1 pl-2 border rounded-md border-slate-300"
                               type="text"
                               value={maxValue}
                               onChange={handleMaxValueChange}
+                              placeholder="3000000"
                             />
                           </div>
                         )
                       ) : null}
                     </div>
                     {/* RESET ALL FILTER BUTTON */}
-                    <div>
+                    <div className="flex w-full mx-auto mt-4">
                       <button
-                        className="px-5 py-2 bg-red-600 rounded-full"
+                        className="flex px-5 py-2 mx-auto bg-red-600 rounded-full text-slate-200"
                         onClick={resetFilters}
                       >
                         Reset all Filters
@@ -314,21 +400,41 @@ const LandingPage = () => {
           )}
         </div>
       </div>
-      {newData &&
-        newData?.map((item) => {
-          const mainImg = item?.images?.filter(
-            (image) => image.type === "Main"
-          );
-          const [mainImgSrc] = mainImg.map((image) => image.path);
-          return (
-            <div key={item.id}>
-              <img className="w-60" src={mainImgSrc} alt="" />
-              <p>{item.model_name}</p>
-            </div>
-          );
-        })}
+      <div>
+        {(sortedData || paginatedData) &&
+          paginatedData?.map((item) => {
+            const mainImg = item?.images?.filter(
+              (image) => image.type === "Main"
+            );
+            const [mainImgSrc] = mainImg.map((image) => image.path);
+            return (
+              <div key={item.id}>
+                <Image
+                  className=""
+                  width={200}
+                  height={90}
+                  src={mainImgSrc}
+                  alt={`picture of ${item.year} ${item.model_name} ${item.trim_name}`}
+                />
+                <p>{item.model_name}</p>
+                <p>{item.price}</p>
+              </div>
+            );
+          })}
+      </div>
+      {/* pagination buttons here */}
+      {porscheData && (
+        <div>
+          <Pagination
+            pageCount={pageCount}
+            handlePageChange={handlePageChange}
+            currentPage={currentPage}
+          />
+        </div>
+      )}
+      <div className="pb-60"></div>
       {isLoading && <p>Loading...</p>}
-      {!isLoading && newData?.length === 0 && (
+      {!isLoading && filteredData?.length === 0 && (
         <p>Oops, no data that matches your search criteria available</p>
       )}
       {error && <p>Error: {error.message}</p>}
@@ -337,6 +443,29 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
+{
+  /* {filteredData &&
+        filteredData?.map((item) => {
+          const mainImg = item?.images?.filter(
+            (image) => image.type === "Main"
+          );
+
+          const [mainImgSrc] = mainImg.map((image) => image.path);
+          return (
+            <div key={item.id}>
+              <Image
+                className=""
+                width={200}
+                height={90}
+                src={mainImgSrc}
+                alt={`picture of ${item.year} ${item.model_name} ${item.trim_name}`}
+              />
+              <p>{item.model_name}</p>
+            </div>
+          );
+        })} */
+}
 
 /* <form className="flex-col bg-green-300 w-fit lg:flex">
           <div className="flex flex-col bg-blue-500 w-60">
