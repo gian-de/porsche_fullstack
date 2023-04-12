@@ -1,15 +1,16 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 
+import Link from "next/link";
 import Image from "next/image";
 import Select from "react-select";
 import { Disclosure } from "@headlessui/react";
+import Navbar from "./Navbar";
 import Pagination from "./Pagination";
 
 import { usePorscheData } from "./hooks/usePorscheData";
 
 import FilterIcon from "./svgs/FilterIcon";
 import Xcircle from "./svgs/Xcircle";
-import PorscheLogo from "../public/porsche-logo-compressed.png";
 
 // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 const baseURL = "http://localhost:7777";
@@ -55,6 +56,7 @@ const LandingPage = () => {
         setMinValue(null);
       } else {
         setMinValue(newValue);
+        setCurrentPage(0);
       }
     }
   };
@@ -63,18 +65,22 @@ const LandingPage = () => {
     if (newValue.length <= 7) {
       setMaxValue(e.target.value);
     }
+    setCurrentPage(0);
   };
 
   const handleModelChange = (selectedOption) => {
     setFormData({ ...formData, model_name: selectedOption });
+    setCurrentPage(0);
   };
 
   const handleDrivetrainChange = (selectedOption) => {
     setFormData({ ...formData, drivetrain: selectedOption });
+    setCurrentPage(0);
   };
 
   const handleEngineLayoutChange = (selectedOption) => {
     setFormData({ ...formData, engine_layout: selectedOption });
+    setCurrentPage(0);
   };
   const handleSortChange = (selectedOption) => {
     const values = selectedOption.value;
@@ -86,11 +92,13 @@ const LandingPage = () => {
     } else {
       setSelectedSortOption(sortOption);
       setSelectedSortDirection(sortDirection);
+      setCurrentPage(0);
     }
     // if-else to set the input state to null and doesnt show "Clear", for it to the show placeholder text but also show the current selected value as the "value" for option
     if (selectedOption.value === "clear") {
       setSelectedSortValue(null);
       setSelectedSortOption(null);
+      setSelectedSortDirection(null);
     } else {
       setSelectedSortValue(selectedOption);
     }
@@ -114,6 +122,7 @@ const LandingPage = () => {
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage);
+    window.scrollTo({ top: 0, behavior: "smooth", duration: 150 });
   };
 
   // defining the "schema" for the options in "Select"
@@ -157,40 +166,6 @@ const LandingPage = () => {
     { value: "clear", label: "Clear Sort ↕" },
   ];
 
-  // filter && sort functionality starts about here
-  // const filteredData = porscheData?.filter((car) => {
-  //   if (betweenOption) {
-  //     const { value } = betweenOption;
-  //     // Filter cars based on selected option and min/max values
-  //     return car[value] >= minValue && car[value] <= (maxValue || 3000000);
-  //   }
-  //   return true;
-  // });
-
-  // ///////////////////////////
-  // const sortedData = filteredData?.sort((a, b) => {
-  //   if (!selectedSortOption) return 0;
-
-  //   const aValue = a[selectedSortOption];
-  //   const bValue = b[selectedSortOption];
-
-  //   if (aValue < bValue) {
-  //     return selectedSortDirection === "asc" ? -1 : 1;
-  //   } else if (aValue > bValue) {
-  //     return selectedSortDirection === "asc" ? 1 : -1;
-  //   }
-  //   return 0;
-  // });
-
-  // const offest = currentPage * ITEMS_PER_PAGE;
-  // const paginatedData = latestData?.slice(offest, offest + ITEMS_PER_PAGE);
-  // const pageCount = Math.ceil(latestData?.length / ITEMS_PER_PAGE);
-
-  // const paginatedData = useMemo(() => {
-  //   const startIndex = currentPage * ITEMS_PER_PAGE;
-  //   return latestData?.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  // }, [currentPage, latestData]);
-
   const filteredData = useMemo(() => {
     return porscheData?.filter((car) => {
       if (betweenOption) {
@@ -215,7 +190,19 @@ const LandingPage = () => {
       }
       return 0;
     });
-  }, [filteredData, selectedSortOption, selectedSortDirection]);
+  }, [
+    filteredData,
+    selectedSortOption,
+    selectedSortDirection,
+    selectedSortValue,
+  ]);
+  useEffect(() => {
+    if (sortedData) {
+      setLatestData(sortedData);
+    } else {
+      setLatestData(filteredData);
+    }
+  }, [filteredData, sortedData]);
 
   const getPaginatedData = () => {
     const startIndex = currentPage * ITEMS_PER_PAGE;
@@ -231,29 +218,12 @@ const LandingPage = () => {
   console.log("SORTEDDD", sortedData);
   console.log("PAGINATED DATA", paginatedData);
   console.log("latest DATA", latestData);
-  useEffect(() => {
-    if (sortedData) {
-      setLatestData(sortedData);
-    } else {
-      setLatestData(filteredData);
-    }
-  }, [filteredData, sortedData]);
 
   return (
     <>
-      <nav className="flex items-center justify-between px-4 py-6 bg-slate-300">
-        <div className="flex items-center space-x-1 sm:space-x-3">
-          <Image
-            className="object-cover w-16 h-12 sm:w-20 sm:h-24"
-            alt="Porsche Logo"
-            src={PorscheLogo}
-            priority
-          />
-          <h1 className="text-xl sm:text-2xl">"Mini-Wiki"</h1>
-        </div>
-      </nav>
-      <div className="flex items-start justify-between px-10 py-3 bg-black">
-        <div className="flex flex-col max-w-xs text-sm text-gray-500 rounded-sm bg-slate-50">
+      <Navbar />
+      <div className="flex items-start justify-between px-10 py-3 bg-slate-200 lg:px-20 lg:justify-end">
+        <div className="flex flex-col max-w-xs text-sm text-gray-500 rounded-sm bg-slate-50 lg:hidden">
           <Disclosure>
             {({ open }) => (
               <>
@@ -400,31 +370,200 @@ const LandingPage = () => {
           )}
         </div>
       </div>
-      <div>
-        {(sortedData || paginatedData) &&
-          paginatedData?.map((item) => {
-            const mainImg = item?.images?.filter(
-              (image) => image.type === "Main"
-            );
-            const [mainImgSrc] = mainImg.map((image) => image.path);
-            return (
-              <div key={item.id}>
-                <Image
-                  className=""
-                  width={200}
-                  height={90}
-                  src={mainImgSrc}
-                  alt={`picture of ${item.year} ${item.model_name} ${item.trim_name}`}
+      <div className="flex">
+        {/* form for lg screen size and up */}
+        <div className="hidden bg-slate-200 lg:flex">
+          <form className="flex flex-col w-64 px-6 pt-10 space-y-6 xl:w-80 xl:px-8">
+            <div className="flex flex-col">
+              <label className="pl-2 text-lg w-fit" htmlFor="select-models">
+                {"Models..."}
+              </label>
+              <div>
+                <Select
+                  inputId="select-models"
+                  isMulti
+                  options={modelOptions}
+                  onChange={handleModelChange}
+                  value={formData.model_name}
+                  placeholder="Cayman, Taycan"
+                  aria-labelledby="select-models-label"
                 />
-                <p>{item.model_name}</p>
-                <p>{item.price}</p>
               </div>
-            );
-          })}
+            </div>
+            <div className="flex flex-col">
+              <label className="pl-2 text-lg w-fit" htmlFor="select-drivetrain">
+                {"Drivetrains..."}
+              </label>
+              <Select
+                inputId="select-drivetrain"
+                isMulti
+                options={drivetrainOptions}
+                onChange={handleDrivetrainChange}
+                value={formData.drivetrain}
+                placeholder="AWD, RWD"
+                aria-labelledby="select-drivetrain-label"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label
+                className="pl-2 text-lg w-fit"
+                htmlFor="select-engineLayout"
+              >
+                {"Engine Layout..."}
+              </label>
+              <Select
+                inputId="select-engineLayout"
+                isMulti
+                options={engineLayoutOptions}
+                onChange={handleEngineLayoutChange}
+                value={formData.engine_layout}
+                placeholder="Mid-Engine"
+                aria-labelledby="select-drivetrain-label"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="pl-2 text-lg w-fit" htmlFor="select-filter">
+                More:
+              </label>
+              <Select
+                inputId="select-filter"
+                options={betweenOptions}
+                onChange={handleBetweenOptionChange}
+                value={betweenOption}
+                placeholder="Price, Year"
+                aria-labelledby="select-filters-label"
+              />
+              {/* render the inputs when the user selects an option aka true */}
+              {betweenOption ? (
+                betweenOption?.value === "year" ? (
+                  <div className="flex items-center justify-center mt-3 space-x-1">
+                    <input
+                      className="flex w-16 py-1 pl-2 border rounded-md border-slate-300"
+                      type="text"
+                      value={minValue}
+                      onChange={handleMinValueChange}
+                      placeholder="1985"
+                    />
+                    <span className="text-lg">-</span>
+                    <input
+                      className="flex w-16 py-1 pl-2 border rounded-md border-slate-300"
+                      type="text"
+                      value={maxValue}
+                      onChange={handleMaxValueChange}
+                      placeholder="2023"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center mt-3 space-x-1">
+                    <input
+                      className="flex w-24 py-1 pl-2 border rounded-md border-slate-300"
+                      type="text"
+                      value={minValue}
+                      onChange={handleMinValueChange}
+                      placeholder="0"
+                    />
+                    <span className="text-lg">-</span>
+                    <input
+                      className="flex w-24 px-2 py-1 border rounded-md border-slate-300"
+                      type="text"
+                      value={maxValue}
+                      onChange={handleMaxValueChange}
+                      placeholder="3000000"
+                    />
+                  </div>
+                )
+              ) : null}
+            </div>
+            {/* RESET ALL FILTER BUTTON */}
+            <div className="flex items-center justify-center pt-3">
+              <button
+                className="flex px-5 py-2 transition duration-150 bg-red-600 rounded-full hover:shadow-xl hover:-translate-x-1 hover:-translate-y-1 ease text-slate-100"
+                onClick={resetFilters}
+              >
+                Reset all Filters
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {isLoading && (
+          <p className="w-full px-20 py-10 text-xl -mr-80">Loading...</p>
+        )}
+        {!isLoading && filteredData?.length === 0 && (
+          <p className="w-full px-20 py-10 text-xl -mr-80">
+            Oops, no data that matches your search criteria available
+          </p>
+        )}
+        {error && (
+          <p className="w-full px-20 py-10 text-xl -mr-80">
+            Error: {error.message}
+          </p>
+        )}
+
+        <div className="flex items-center justify-center w-full p-10">
+          <div className="grid gap-10 lg:gap-16 sm:grid-cols-2">
+            {(sortedData || paginatedData) &&
+              paginatedData?.map((item) => {
+                const mainImg = item?.images?.filter(
+                  (image) => image.type === "Main"
+                );
+                const [mainImgSrc] = mainImg.map((image) => image.path);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex flex-col overflow-hidden transition bg-black rounded-sm shadow-md ease hover:shadow-2xl text-slate-50"
+                  >
+                    <div className="flex items-center flex-1 mx-auto">
+                      <Image
+                        width={380}
+                        height={200}
+                        className="object-contain"
+                        src={mainImgSrc}
+                        alt={`picture of ${item.year} ${item.model_name} ${item.trim_name}`}
+                      />
+                    </div>
+                    <div className="flex flex-col items-center py-6 space-y-2 text-xl">
+                      <p className="text-2xl">{item.year}</p>
+                      <div className="flex space-x-2 text-3xl">
+                        <p>{item.model_name}</p>
+                        {/* filter out "Base" from info card */}
+                        <p>
+                          {item.trim_name === "Carrera GT" ||
+                          item.trim_name === "Base"
+                            ? null
+                            : item.trim_name}
+                        </p>
+                      </div>
+                      <p>{item.horsepower}hp</p>
+                      <div className="flex space-x-2 text-lg">
+                        <p>0 - 60 mph in</p>
+                        <p>{item.zero_to_sixty} s</p>
+                      </div>
+                      <p className="text-yellow-400">
+                        {item.price.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          minimumFractionDigits: 0,
+                        })}
+                      </p>
+                      <Link
+                        className="text-base text-gray-400 underline"
+                        href={"/"}
+                      >
+                        view more info...
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
       </div>
+
       {/* pagination buttons here */}
-      {porscheData && (
-        <div>
+      {!isLoading && pageCount > 1 && (sortedData || paginatedData) && (
+        <div className="bg-slate-200">
           <Pagination
             pageCount={pageCount}
             handlePageChange={handlePageChange}
@@ -432,137 +571,8 @@ const LandingPage = () => {
           />
         </div>
       )}
-      <div className="pb-60"></div>
-      {isLoading && <p>Loading...</p>}
-      {!isLoading && filteredData?.length === 0 && (
-        <p>Oops, no data that matches your search criteria available</p>
-      )}
-      {error && <p>Error: {error.message}</p>}
     </>
   );
 };
 
 export default LandingPage;
-
-{
-  /* {filteredData &&
-        filteredData?.map((item) => {
-          const mainImg = item?.images?.filter(
-            (image) => image.type === "Main"
-          );
-
-          const [mainImgSrc] = mainImg.map((image) => image.path);
-          return (
-            <div key={item.id}>
-              <Image
-                className=""
-                width={200}
-                height={90}
-                src={mainImgSrc}
-                alt={`picture of ${item.year} ${item.model_name} ${item.trim_name}`}
-              />
-              <p>{item.model_name}</p>
-            </div>
-          );
-        })} */
-}
-
-/* <form className="flex-col bg-green-300 w-fit lg:flex">
-          <div className="flex flex-col bg-blue-500 w-60">
-            <label htmlFor="select-models">{"Select Models..."}</label>
-            <div>
-              <Select
-                inputId="select-models"
-                isMulti
-                options={modelOptions}
-                onChange={handleModelChange}
-                value={formData.model_name}
-                placeholder="Cayman, Taycan"
-                aria-labelledby="select-models-label"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col bg-blue-600 w-60">
-            <label htmlFor="select-drivetrain">{"Select Drivetrains..."}</label>
-            <Select
-              inputId="select-drivetrain"
-              isMulti
-              options={drivetrainOptions}
-              onChange={handleDrivetrainChange}
-              value={formData.drivetrain}
-              placeholder="AWD, RWD"
-              aria-labelledby="select-drivetrain-label"
-            />
-          </div>
-          <div className="flex flex-col bg-blue-600 w-60">
-            <label htmlFor="select-engineLayout">
-              {"Select Engine Layout..."}
-            </label>
-            <Select
-              inputId="select-engineLayout"
-              isMulti
-              options={engineLayoutOptions}
-              onChange={handleEngineLayoutChange}
-              value={formData.engine_layout}
-              placeholder="Mid-Engine"
-              aria-labelledby="select-drivetrain-label"
-            />
-          </div>
-
-          <div className="flex items-center mt-4">
-            <label htmlFor="select-filter" className="mr-2">
-              Filter By:
-            </label>
-            <Select
-              inputId="select-filter"
-              options={betweenOptions}
-              onChange={handleBetweenOptionChange}
-              value={betweenOption}
-              placeholder="Price, Year"
-              aria-labelledby="select-filters-label"
-            />
-            {/* render the inputs when the user selects an option aka true 
-            {betweenOption ? (
-              betweenOption?.value === "year" ? (
-                <div className="bg-red-400 ">
-                  <input
-                    type="text"
-                    value={minValue}
-                    onChange={handleMinValueChange}
-                    placeholder="1985"
-                  />
-                  <span>-</span>
-                  <input
-                    type="text"
-                    value={maxValue}
-                    onChange={handleMaxValueChange}
-                    placeholder="2023"
-                  />
-                </div>
-              ) : (
-                <div className=" bg-slate-200">
-                  <input
-                    type="text"
-                    value={minValue}
-                    onChange={handleMinValueChange}
-                  />
-                  <span>-</span>
-                  <input
-                    type="text"
-                    value={maxValue}
-                    onChange={handleMaxValueChange}
-                  />
-                </div>
-              )
-            ) : null}
-          </div>
-          
-          <div>
-            <button
-              className="px-5 py-2 bg-red-600 rounded-full"
-              onClick={resetFilters}
-            >
-              Reset all Filters
-            </button>
-          </div>
-        </form> */
