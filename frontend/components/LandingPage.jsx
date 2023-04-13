@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 
 import Link from "next/link";
 import Image from "next/image";
 import Select from "react-select";
 import { Disclosure } from "@headlessui/react";
 import Navbar from "./Navbar";
+import Modal from "./Modal";
 import Pagination from "./Pagination";
 
 import { usePorscheData } from "./hooks/usePorscheData";
@@ -27,7 +29,10 @@ const LandingPage = () => {
   });
 
   const { porscheData, isLoading, error } = usePorscheData(formData);
-  // // Pagination state and for latest data after filter/sort
+  // state for modal when viewing a car
+  const [selectedViewMore, setSelectedViewMore] = useState(null);
+
+  // Pagination state and for latest data after filter/sort
   const ITEMS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(0);
   const [latestData, setLatestData] = useState([]);
@@ -516,9 +521,14 @@ const LandingPage = () => {
                 const [mainImgSrc] = mainImg.map((image) => image.path);
 
                 return (
-                  <article
+                  <motion.article
                     key={item.id}
                     className="flex flex-col overflow-hidden transition bg-black rounded-sm shadow-md ease hover:shadow-2xl text-slate-50 hover:scale-105"
+                    layoutId={`${item?.id}`}
+                    transition={{
+                      duration: 0.4,
+                      ease: [0.6, 0.01, 0.05, 0.95],
+                    }}
                   >
                     <div className="flex items-center flex-1 mx-auto">
                       <Image
@@ -553,18 +563,25 @@ const LandingPage = () => {
                           minimumFractionDigits: 0,
                         })}
                       </p>
-                      <Link
+                      <button onClick={() => setSelectedViewMore(item)}>
+                        view more
+                      </button>
+                      {/* <Link
                         className="text-base text-gray-400 underline"
                         href={`/${item.model_name}/${item.trim_name}/${item.year}`}
                       >
                         view more info...
-                      </Link>
+                      </Link> */}
                     </div>
-                  </article>
+                  </motion.article>
                 );
               })}
           </div>
         </div>
+        <Modal
+          selectedViewMore={selectedViewMore}
+          setSelectedViewMore={setSelectedViewMore}
+        />
       </div>
 
       {/* pagination buttons here */}
