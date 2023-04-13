@@ -218,11 +218,11 @@ const LandingPage = () => {
 
   const pageCount = Math.ceil(latestData?.length / ITEMS_PER_PAGE);
 
-  console.log("REACT_QUERY_DATA", porscheData);
-  console.log("sorted/filteredData", filteredData);
-  console.log("SORTEDDD", sortedData);
-  console.log("PAGINATED DATA", paginatedData);
-  console.log("latest DATA", latestData);
+  // console.log("REACT_QUERY_DATA", porscheData);
+  // console.log("sorted/filteredData", filteredData);
+  // console.log("SORTEDDD", sortedData);
+  // console.log("PAGINATED DATA", paginatedData);
+  // console.log("latest DATA", latestData);
 
   return (
     <>
@@ -524,7 +524,6 @@ const LandingPage = () => {
                   <motion.article
                     key={item.id}
                     className="flex flex-col overflow-hidden transition bg-black rounded-sm shadow-md ease hover:shadow-2xl text-slate-50 hover:scale-105"
-                    layoutId={`${item?.id}`}
                     transition={{
                       duration: 0.4,
                       ease: [0.6, 0.01, 0.05, 0.95],
@@ -563,7 +562,10 @@ const LandingPage = () => {
                           minimumFractionDigits: 0,
                         })}
                       </p>
-                      <button onClick={() => setSelectedViewMore(item)}>
+                      <button
+                        onClick={() => setSelectedViewMore(item)}
+                        className="text-base text-gray-400 underline"
+                      >
                         view more
                       </button>
                       {/* <Link
