@@ -13,8 +13,8 @@ import FilterIcon from "./svgs/FilterIcon";
 import Xcircle from "./svgs/Xcircle";
 
 // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-const baseURL = "http://localhost:7777";
-const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
+// const baseURL = "http://localhost:7777";
+// const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 const LandingPage = () => {
   // state for form logic starts
@@ -122,7 +122,7 @@ const LandingPage = () => {
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage);
-    window.scrollTo({ top: 0, behavior: "smooth", duration: 150 });
+    window.scrollTo({ top: 100, behavior: "smooth", duration: 150 });
   };
 
   // defining the "schema" for the options in "Select"
@@ -163,7 +163,7 @@ const LandingPage = () => {
     { value: "horsepower-desc", label: "Horsepower (desc)" },
     { value: "model_name-asc", label: "Alphabetical (a-z)" },
     { value: "model_name-desc", label: "Alphabetical (z-a)" },
-    { value: "clear", label: "Clear Sort ↕" },
+    // { value: "clear", label: "Clear Sort ↕" },
   ];
 
   const filteredData = useMemo(() => {
@@ -227,7 +227,13 @@ const LandingPage = () => {
           <Disclosure>
             {({ open }) => (
               <>
-                <Disclosure.Button className="flex items-center justify-between px-4 py-2 space-x-3">
+                <Disclosure.Button
+                  className={`flex items-center justify-between px-4 py-2 space-x-3 ${
+                    open
+                      ? ""
+                      : "overflow-hidden rounded-sm ring-1 ring-gray-400/30"
+                  }`}
+                >
                   {open ? <span></span> : <h4>Filter by...</h4>}
                   {open ? <Xcircle /> : <FilterIcon />}
                 </Disclosure.Button>
@@ -336,7 +342,7 @@ const LandingPage = () => {
                               type="text"
                               value={maxValue}
                               onChange={handleMaxValueChange}
-                              placeholder="3000000"
+                              placeholder="3,000,000"
                             />
                           </div>
                         )
@@ -510,9 +516,9 @@ const LandingPage = () => {
                 const [mainImgSrc] = mainImg.map((image) => image.path);
 
                 return (
-                  <div
+                  <article
                     key={item.id}
-                    className="flex flex-col overflow-hidden transition bg-black rounded-sm shadow-md ease hover:shadow-2xl text-slate-50"
+                    className="flex flex-col overflow-hidden transition bg-black rounded-sm shadow-md ease hover:shadow-2xl text-slate-50 hover:scale-105"
                   >
                     <div className="flex items-center flex-1 mx-auto">
                       <Image
@@ -540,7 +546,7 @@ const LandingPage = () => {
                         <p>0 - 60 mph in</p>
                         <p>{item.zero_to_sixty} s</p>
                       </div>
-                      <p className="text-yellow-400">
+                      <p className="text-yellow-400/90">
                         {item.price.toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
@@ -549,12 +555,12 @@ const LandingPage = () => {
                       </p>
                       <Link
                         className="text-base text-gray-400 underline"
-                        href={"/"}
+                        href={`/${item.model_name}/${item.trim_name}/${item.year}`}
                       >
                         view more info...
                       </Link>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
           </div>
