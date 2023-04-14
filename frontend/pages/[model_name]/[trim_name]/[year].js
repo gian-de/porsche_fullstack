@@ -2,22 +2,18 @@ import { useRouter } from "next/router";
 
 export default function CarPage({ car }) {
   const router = useRouter();
-  console.log("data", car);
+
   const data = car[0];
   const description = car[0].description;
   //   const parsedDescription = JSON.parse(description);
   const parsedDescription = JSON.parse(description.replace(/“|”/g, '"'));
-
-  console.log("p tags", description);
-  console.log("p array maybe", parsedDescription);
-  // remove the "<p>" tags from the data
 
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="w-full bg-red-200">
+    <div className="w-full bg-yellow-200">
       <div className="flex flex-col">
         <h1>
           {data?.make} {data?.model_name} {data?.trim_name} ({data?.year})
@@ -35,8 +31,7 @@ export default function CarPage({ car }) {
 }
 
 export async function getStaticPaths() {
-  // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-  const baseURL = "http://localhost:7777";
+  const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
   const res = await fetch(`${baseURL}/api/porsche`);
   const cars = await res.json();
@@ -55,8 +50,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const { model_name, trim_name, year } = params;
-  // const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-  const baseURL = "http://localhost:7777";
+  const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
   const res = await fetch(
     `${baseURL}/api/porsche?model_name=${model_name}&trim_name=${trim_name}&year=${year}`

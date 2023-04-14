@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
-// const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-const baseURL = "http://localhost:7777";
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+// const baseURL = "http://localhost:7777";
 const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export const usePorscheData = (formData) => {
@@ -29,7 +29,7 @@ export const usePorscheData = (formData) => {
           .join(",");
       }
 
-      const response = await axios.get(`${baseURL}/api/porsche`, {
+      const response = await axios.get(`${baseURL}${apiEndpoint}`, {
         params,
       });
       return response.data;

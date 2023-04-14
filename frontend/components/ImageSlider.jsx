@@ -5,8 +5,6 @@ import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 
 const ImageSlider = ({ imagesArray, selectedViewMore }) => {
-  console.log("imagesArray", imagesArray);
-  console.log("data maybe", selectedViewMore);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleSlide = (currentIndex) => {
