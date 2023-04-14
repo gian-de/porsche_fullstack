@@ -14,10 +14,6 @@ import { usePorscheData } from "./hooks/usePorscheData";
 import FilterIcon from "./svgs/FilterIcon";
 import Xcircle from "./svgs/Xcircle";
 
-// const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-// const baseURL = "http://localhost:7777";
-// const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT;
-
 const LandingPage = () => {
   // state for form logic starts
   const [formData, setFormData] = useState({
