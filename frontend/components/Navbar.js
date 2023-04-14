@@ -11,7 +11,9 @@ const Navbar = () => {
           src={PorscheLogo}
           priority
         />
-        <h1 className="text-xl sm:text-2xl text-slate-50">"Mini-Wiki"</h1>
+        <h1 className="text-xl sm:text-2xl text-slate-50">
+          &ldquo;Mini-Wiki&rdquo;
+        </h1>
       </div>
     </nav>
   );
