@@ -482,7 +482,7 @@ const LandingPage = () => {
               ) : null}
             </div>
             {/* RESET ALL FILTER BUTTON */}
-            <div className="flex items-center justify-center pt-3">
+            <div className="flex items-center justify-center pt-3 pb-16">
               <button
                 className="flex px-5 py-2 transition duration-150 bg-red-600 rounded-full hover:shadow-xl hover:-translate-x-1 hover:-translate-y-1 ease text-slate-100"
                 onClick={resetFilters}
