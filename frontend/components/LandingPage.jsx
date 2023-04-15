@@ -127,7 +127,13 @@ const LandingPage = () => {
     setCurrentPage(selectedPage);
     // scroll to parent div after page change is ran
     const parentDiv = document.getElementById("parent-div");
-    parentDiv.scrollIntoView({ behavior: "smooth", duration: 150 });
+    window.scrollTo({
+      top: parentDiv.offsetTop,
+      behavior: "smooth",
+      duration: 150,
+    });
+    document.querySelector("html").scrollTop = parentDiv.offsetTop;
+    document.querySelector("body").scrollTop = parentDiv.offsetTop;
   };
 
   // defining the "schema" for the options in "Select"
