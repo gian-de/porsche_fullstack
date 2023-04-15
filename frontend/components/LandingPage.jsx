@@ -125,7 +125,9 @@ const LandingPage = () => {
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage);
-    window.scrollTo({ top: 100, behavior: "smooth", duration: 150 });
+    // scroll to parent div after page change is ran
+    const parentDiv = document.getElementById("parent-div");
+    parentDiv.scrollIntoView({ behavior: "smooth", duration: 150 });
   };
 
   // defining the "schema" for the options in "Select"
@@ -522,7 +524,10 @@ const LandingPage = () => {
           </p>
         )}
 
-        <div className="flex items-center justify-center w-full p-10">
+        <div
+          id="parent-div"
+          className="flex items-center justify-center w-full p-10"
+        >
           <div className="grid gap-10 lg:gap-16 sm:grid-cols-2">
             {(sortedData || paginatedData) &&
               paginatedData?.map((item) => {
