@@ -25,6 +25,8 @@ const LandingPage = () => {
   });
 
   const { porscheData, isLoading, error } = usePorscheData(formData);
+  // state for mobile if Disclosure is true
+  const [disclosureOpen, setDisclosureOpen] = useState(false);
   // state for modal when viewing a car
   const [selectedViewMore, setSelectedViewMore] = useState(null);
 
@@ -223,12 +225,23 @@ const LandingPage = () => {
   return (
     <>
       <Navbar />
-      <div className="flex items-start justify-between px-10 py-3 bg-slate-200 lg:px-20 lg:justify-end">
-        <div className="flex flex-col max-w-xs text-sm text-gray-500 rounded-sm bg-slate-50 lg:hidden">
+      <div
+        className={`${
+          disclosureOpen
+            ? "flex-col-reverse items-center sm:items-start sm:flex sm:flex-row"
+            : "flex"
+        } flex items-start justify-between px-10 py-3 bg-slate-200 lg:px-20 lg:justify-end`}
+      >
+        <div
+          className={`${
+            disclosureOpen ? "mt-3 sm:mt-0" : ""
+          } flex flex-col max-w-xs text-sm text-gray-500 rounded-sm bg-slate-50 lg:hidden`}
+        >
           <Disclosure>
             {({ open }) => (
               <>
                 <Disclosure.Button
+                  onClick={() => setDisclosureOpen(!disclosureOpen)}
                   className={`flex items-center justify-between px-4 py-2 space-x-3 ${
                     open
                       ? ""
@@ -367,7 +380,9 @@ const LandingPage = () => {
         <div className="flex">
           {sortedData?.length === 1 ? null : (
             <Select
-              className="text-sm w-36 whitespace-nowrap sm:w-40 sm:text-base"
+              className={`${
+                disclosureOpen ? "w-64 sm:w-40" : ""
+              } text-sm w-36 whitespace-nowrap sm:w-40 sm:text-base md:w-60`}
               name="sort"
               options={sortOptions}
               onChange={handleSortChange}
