@@ -34,7 +34,7 @@ const Modal = ({ selectedViewMore, setSelectedViewMore }) => {
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
-        className="w-[80%] md:w-[85%] max-w-5xl px-10 mx-auto my-14 bg-slate-100 cursor-default"
+        className="w-[80%] md:w-[85%] max-w-5xl px-6 sm:px-10 mx-auto my-14 bg-slate-100 cursor-default"
         initial={{ opacity: 0, y: 80 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 80 }}
@@ -70,6 +70,13 @@ const Modal = ({ selectedViewMore, setSelectedViewMore }) => {
           </div>
           {/* start of "MORE INFO" */}
           <div className="flex flex-col mt-6 space-y-2 sm:w-fit sm:mx-auto sm:pl-16">
+            <p className="text-lg font-medium sm:text-center sm:text-xl">
+              {selectedViewMore.price.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 0,
+              })}
+            </p>
             <p>
               horsepower:
               <span className="pl-4 text-xl font-medium">
@@ -93,13 +100,6 @@ const Modal = ({ selectedViewMore, setSelectedViewMore }) => {
                 </span>
               </p>
             </div>
-            <p className="text-xl font-medium sm:text-2xl">
-              {selectedViewMore.price.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-                minimumFractionDigits: 0,
-              })}
-            </p>
           </div>
           {/* youtube video starts here with more info */}
           <div className="mt-20">
@@ -113,7 +113,7 @@ const Modal = ({ selectedViewMore, setSelectedViewMore }) => {
           </div>
 
           {parsedData && (
-            <section className="px-4 py-12 mt-20 sm:px-10 bg-slate-200">
+            <section className="py-12 mt-14 sm:px-6 sm:mt-20 sm:bg-slate-200">
               <p className="text-4xl text-center">Review</p>
               <div className="flex flex-col mt-8 lg:px-20">
                 <p>

@@ -20,6 +20,7 @@
     "react-dom": "18.2.0",
     "react-image-gallery": "^1.2.11",
     "react-paginate": "^8.1.5",
+    "react-responsive": "^9.0.2",
     "react-select": "^5.7.2",
     "react-youtube": "^10.1.0"
   },

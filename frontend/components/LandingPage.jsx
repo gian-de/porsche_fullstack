@@ -534,7 +534,7 @@ const LandingPage = () => {
           id="parent-div"
           className="flex items-center justify-center w-full p-10"
         >
-          <div className="grid gap-10 lg:gap-16 sm:grid-cols-2">
+          <div className="grid gap-10 lg:gap-16 sm:grid-cols-2 xl:grid-cols-3 xl:gap-12">
             {(sortedData || paginatedData) &&
               paginatedData?.map((item) => {
                 const mainImg = item?.images?.filter(
