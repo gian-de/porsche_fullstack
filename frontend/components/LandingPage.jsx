@@ -403,7 +403,7 @@ const LandingPage = () => {
       <div className="flex">
         {/* form for lg screen size and up */}
         <div className="hidden bg-slate-200 lg:flex">
-          <form className="flex flex-col w-64 px-6 pt-10 space-y-6 xl:w-80 xl:px-8">
+          <form className="flex flex-col w-64 px-6 pt-10 space-y-6 xl:w-96 xl:px-8">
             <div className="flex flex-col">
               <label className="pl-2 text-lg w-fit" htmlFor="select-models">
                 {"Models..."}
@@ -534,7 +534,7 @@ const LandingPage = () => {
           id="parent-div"
           className="flex items-center justify-center w-full p-10"
         >
-          <div className="grid gap-10 lg:gap-16 sm:grid-cols-2 xl:grid-cols-3 xl:gap-12">
+          <div className="grid gap-10 lg:gap-16 sm:grid-cols-2 xl:grid-cols-3 xl:gap-20">
             {(sortedData || paginatedData) &&
               paginatedData?.map((item) => {
                 const mainImg = item?.images?.filter(
