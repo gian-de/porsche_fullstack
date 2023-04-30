@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
+import { CgSpinner } from "react-icons/cg";
 
 const ImageSlider = ({ imagesArray, selectedViewMore }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,7 +21,9 @@ const ImageSlider = ({ imagesArray, selectedViewMore }) => {
         onSlide={handleSlide}
         renderItem={(item, idx) => (
           <div className="relative flex items-center justify-center mt-12 bg-black h-40 sm:h-96 lg:h-[28rem]">
-            <p className="text-2xl text-slate-50">Loading...</p>
+            <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+              <CgSpinner className="text-white animate-spin" size={50} />
+            </div>
             <Image
               className="z-10 object-contain"
               fill
