@@ -11,6 +11,7 @@ import Pagination from "./Pagination";
 
 import { usePorscheData } from "./hooks/usePorscheData";
 
+import { CgSpinner } from "react-icons/cg";
 import FilterIcon from "./svgs/FilterIcon";
 import Xcircle from "./svgs/Xcircle";
 
@@ -517,7 +518,9 @@ const LandingPage = () => {
         </div>
 
         {isLoading && (
-          <p className="w-full px-20 py-10 text-xl -mr-80">Loading...</p>
+          <div className="flex items-center justify-center w-full px-20 py-10 lg:-mr-80">
+            <CgSpinner className="m-20 text-black animate-spin" size={100} />
+          </div>
         )}
         {!isLoading && filteredData?.length === 0 && (
           <p className="w-full px-20 py-10 text-xl -mr-80">
